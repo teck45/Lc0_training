@@ -14,8 +14,8 @@ for FOLDER in $FROMF/*; do
     echo mv "$FOLDER" "$WHEREF"
     mv "$FOLDER" "$WHEREF"
     i=$(( "$i" + 1 ))
-    echo "#""$i"
-    if [[ "$i" -ge "$N" ]]
+    echo "#""$i" out of "$N"
+    if [[ "$i" -ge "$N" ]]:
     then
             echo operation completed
             exit
