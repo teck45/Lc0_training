@@ -108,3 +108,23 @@ The training pipeline will automatically restore from a previous model if it exi
 ## Supervised training
 
 Generating trainingdata from pgn files is currently broken and has low priority, feel free to create a PR.
+
+## Useful commands
+
+	During training we often need to do different things at the same, there is linux utility that hels to be more productive called screen. Screat creates terminal window we can attach and deattach. Some examples
+	```
+	create screen:
+	screen -S name
+	attach to background screen:
+	screen -r name
+	forcefully attach screen, needed when another user already attached to that stream
+	screen -Dr name
+	deattach from screen and keep it running in the background:
+	ctrl + a + d
+	list all screens:
+	screen -ls
+	close screen:
+	screen -S name -X quit
+	close all screens:
+	killall screen
+	
