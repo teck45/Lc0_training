@@ -118,7 +118,7 @@ that hels to be more productive called screen. Screen creates terminal window we
 	screen -S name
 	attach to background screen:
 	screen -r name
-	forcefully attach screen, needed when another user already attached to that stream
+	forcefully attach screen, needed when another user already attached
 	screen -Dr name
 	deattach from screen and keep it running in the background:
 	ctrl + a + d
