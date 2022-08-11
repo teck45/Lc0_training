@@ -127,4 +127,4 @@ Generating trainingdata from pgn files is currently broken and has low priority,
 	screen -S name -X quit
 	close all screens:
 	killall screen
-	
+	```
