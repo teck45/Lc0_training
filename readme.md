@@ -112,7 +112,7 @@ Generating trainingdata from pgn files is currently broken and has low priority,
 ## Useful commands
 
 	During training we often need to do different things at the same, there is linux utility that hels to be more productive called screen. Screat creates terminal window we can attach and deattach. Some examples
-	```
+	
 	create screen:
 	screen -S name
 	attach to background screen:
@@ -127,4 +127,4 @@ Generating trainingdata from pgn files is currently broken and has low priority,
 	screen -S name -X quit
 	close all screens:
 	killall screen
-	```
+	
