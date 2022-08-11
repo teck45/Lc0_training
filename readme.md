@@ -59,8 +59,8 @@ dataset:
   num_chunks: 100000                   # newest nof chunks to parse
   train_ratio: 0.90                    # trainingset ratio
   # For separated test and train data.
-  input_train: '/path/to/chunks/*/draw/' # supports glob
-  input_test: '/path/to/chunks/*/draw/'  # supports glob
+  input_train: '/path/to/chunks/*/' # supports glob
+  input_test: '/path/to/chunks/*/'  # supports glob
   # For a one-shot run with all data in one directory.
   # input: '/path/to/chunks/*/draw/'
 
