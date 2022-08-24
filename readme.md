@@ -15,7 +15,7 @@ wget https://storage.lczero.org/files/training_data/training-run1--20200711-2017
 #download single tar archive with training data
 wget -i /content/urls.txt -P /content/storagedata/ 
 #download all training tar archives from urls.txt file and store them in particular folder
-tar -xzf training-run1--20200711-2017.tar # untar single tar archive into current directory
+tar -xzf training-run1--20200711-2017.tar # untar single tar archive into current directory, with simple tar without compression use tar -xf 
 find /content/storagedata/ -name '*.tar' -exec tar -xf {} -C /content/traindata \;
 # untar all .tar training files from storagedata folder into particular folder
 ```
