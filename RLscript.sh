@@ -43,7 +43,6 @@ function datageneration () {
 	FULLNETPATH="$NETSPATH""$BASENAME"".pb.gz"
 	echo complete net path for data generation "$FULLNETPATH"
 	cd ~ && "$RLSTARTPATH" "$FULLNETPATH"
-
 }
 
 function rlend ()  {
@@ -193,7 +192,6 @@ else
   BESTNET=""
 fi
 BASENAME="$BASENAMECORE""$BESTNET""$STEPSDONE" #BESTNET can be empty "" if no swa is better or "swa-" if swa net is better
-
 }
 
 function mv_first_folder()
@@ -202,9 +200,7 @@ function mv_first_folder()
 local FROMF="$1" # second parameter passed to script during call. Example: /content/drive/MyDrive/data
 local WHEREF="$2" #third parameter passed, folder path where to move files
 
-
 echo mv earliest  data folders out
-
 echo cd "$FROMF"
 cd "$FROMF"
 
