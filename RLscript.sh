@@ -26,7 +26,7 @@ DATAGENLIMITMB=192 #192 mb for 500 steps # 768 #2400 - 100k chunks, 768 for 32k 
 RLSTARTPATH="./rlstart.sh"
 NETSPATH="/mnt2/nets/BT1024-rl-lowlr/"
 BASENAMECORE="BT1024-rl-lowlr-" #swa-"
-#pick_best_net #launching function to check which net is better (swa vs no swa), result is global BESTNET variable
+#pick_best_net #launching function to check which net is better (swa vs no swa), result is global BASENAME variable
 #BASENAME="$BASENAMECORE""$BESTNET""$STEPSDONE" #BESTNET can be empty "" if no swa is better or "swa-" if swa net is better
 #commented because basename calculation moved into pick best net function
 #fullnetpath we want as result "/mnt/nets/40b-sicilian-low-lr/40b-sicilian-low-lr-swa-3500.pb.gz", 3500 will be read from trainstepslog.txt (stepsdone), .pb.gz will be added by script
@@ -37,7 +37,7 @@ function get_folder_size () {
 
 function datageneration () {
 	STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
-        pick_best_net #launching function to check which net is better (swa vs no swa), result is global BESTNET variable
+        pick_best_net #launching function to check which net is better (swa vs no swa), result is global BASENAME variable
 #	BASENAME="$BASENAMECORE""$BESTNET""$STEPSDONE" #BESTNET can be empty "" if no swa is better or "swa-" if swa net is better #moved into pick best net function
 	echo BEST P ACC NET IS $BESTNET
 	FULLNETPATH="$NETSPATH""$BASENAME"".pb.gz"
