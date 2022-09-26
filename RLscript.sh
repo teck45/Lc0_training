@@ -31,7 +31,9 @@ BASENAMECORE="BT1024-rl-lowlr-" #swa-"
 #commented because basename calculation moved into pick best net function
 #fullnetpath we want as result "/mnt/nets/40b-sicilian-low-lr/40b-sicilian-low-lr-swa-3500.pb.gz", 3500 will be read from trainstepslog.txt (stepsdone), .pb.gz will be added by script
 
-FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
+function get_folder_fize () {
+        FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
+}
 
 function datageneration () {
 	STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
@@ -225,7 +227,7 @@ echo operation completed
 
 while true
 do
-	FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
+        get_folder_fize #calling function to calculate folder size
 	if [[ "$FOLDERSIZE" -lt "$DATAGENLIMITMB"  ]] 
 	then
 		rlend #calling function to close clients that may be running
