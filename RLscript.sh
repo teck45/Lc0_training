@@ -233,14 +233,14 @@ do
 		rlend #calling function to close clients that may be running
                 echo folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
 		datageneration  #pathtonetwork
-	while [ "$FOLDERSIZE" -lt "$DATAGENLIMITMB" ] # run while we have less data then needed
+	while [ "$FOLDERSIZE" -lt "$DATAGENLIMITMB" ] # run while we have less data than needed
 	do
         	sleep 30m
         	get_folder_size
        		echo folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
 	done
 	fi
-	if [[ "$FOLDERSIZE" -ge "$DATAGENLIMITMB"  ]] # if we have more data then needed call end clients, splitrename and train.py
+	if [[ "$FOLDERSIZE" -ge "$DATAGENLIMITMB"  ]] # if we have more data than needed call end clients, splitrename and train.py
 	then
 		echo limit is reached, folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
 		pick_best_net #launching function to check which net is better (swa vs no swa), result is global BESTNET and BASENAME variables
