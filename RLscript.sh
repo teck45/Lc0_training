@@ -223,7 +223,6 @@ mv  *"-""$MINNUMBER"[a-z]* "$WHEREF" #pattern will use folders with names such a
 echo operation completed
 }
 
-
 while true
 do
 	FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
