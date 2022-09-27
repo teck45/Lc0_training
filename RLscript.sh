@@ -4,14 +4,13 @@ TFFOLDER="/mnt/lczero-training-Nadam-rl/tf"
 YAMLPATH="/mnt/config/bt1024-rl-lowlr.yaml"    #"/mnt/config/40b-sicilian-low-lr.yaml"
 RESCORERPATH="/mnt/lc0-rescore_tb/build/release"  #path to folder where rescorer executable file is, no / at the end
 SYZYGYPATH="/mnt/syzygy"
-# so we include this lc0 folder here too :)
 STEPSDONEPATH="/mnt/trainstepslog.txt"
 STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
 STOPFILEPATH="/mnt/stopfile.txt"
 LASTNOSWANETSTAT="$TFFOLDER""/""no_swa_last_net_stat.txt"
 LASTSWANETSTAT="$TFFOLDER""/""swa_last_net_stat.txt"
 
-RAWDATAPATH="/mnt/atnb-raw/lc0" # ATTENTION! XDG HOMEPATH creates lc0 folder inside homepath folder
+RAWDATAPATH="/mnt/atnb-raw/lc0" # ATTENTION! XDG HOMEPATH creates lc0 folder inside homepath folder, so we include this lc0 folder here too :)
 RAWTESTPATH="/mnt/atnb-raw-test"
 NOTRESCOREDTRAINPATH="/mnt/no-r-train" #Folder where not rescored data is stored, separate from rawdata where clients send their data, and separate from folders used by traininig script
 NOTRESCOREDTESTPATH="/mnt/no-r-test"
