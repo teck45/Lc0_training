@@ -31,14 +31,6 @@ BASENAMECORE="BT1024-rl-lowlr-" #swa-"
 #commented because basename calculation moved into pick best net function
 #fullnetpath we want as result "/mnt/nets/40b-sicilian-low-lr/40b-sicilian-low-lr-swa-3500.pb.gz", 3500 will be read from trainstepslog.txt (stepsdone), .pb.gz will be added by script
 
-function get_folder_size () {
-        FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
-}
-
-function report_folder_size () {
-        echo folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
-}
-
 function datageneration () {
 	STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
         pick_best_net #launching function to check which net is better (swa vs no swa), result is global BASENAME variable
@@ -147,7 +139,7 @@ function train () {
 	fi
 }
 
-function getnetnumber()  #helper function for mv-first-folder(), will output 123 from name-swa-123a and name-123a
+function get_net_number()  #helper function for mv-first-folder(), will output 123 from name-swa-123a and name-123a
 {
 local netname=$( basename "$1" )
 local i=0
@@ -168,7 +160,6 @@ function analyze_net_stat() {
 local line=$1
 local pattern=$2 
 local length=${#pattern}
-echo line pattern len $line $pattern $length
 for (( i=0; i<=${#line}; i++ )); do
   local check=${line:i:$length}
   if [[ $check == "$pattern" ]]; # "P Acc=" "V Acc="
@@ -211,7 +202,7 @@ cd "$FROMF"
 local MINNUMBER=100000000 # 100M steps is reasonably high number not supposed to exist
 
 for FOLDER in $FROMF/*; do
-    getnetnumber "$FOLDER" # function will save output in global variable netnumber
+    get_net_number "$FOLDER" # function will save output in global variable netnumber
     if [[ "$netnumber" -le "$MINNUMBER" ]]
     then
       MINNUMBER="$netnumber"
@@ -223,6 +214,14 @@ cd "$FROMF"
 echo mv  *"-""$MINNUMBER"[a-z]* "$WHEREF"
 mv  *"-""$MINNUMBER"[a-z]* "$WHEREF" #pattern will use folders with names such as *-123a *-123ab but will not use -1230a
 echo operation completed
+}
+
+function get_folder_size () {
+        FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
+}
+
+function report_folder_size () {
+        echo folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
 }
 
 while true
