@@ -143,7 +143,6 @@ function get_net_number()  #helper function for mv-first-folder(), will output 1
 local netname=$( basename "$1" )
 local i=0
 for (( i=${#netname}; i>0; i-- )); do
-#  echo "${netname:$i:1}"
   if [[ "${netname:$i:1}" == "-" ]]
   then
     iplus=$(( $i + 1 ))
@@ -178,7 +177,7 @@ analyze_net_stat "$no_swa_str" "P Acc="
 local NO_SWA_PACC=$net_stat_result
 analyze_net_stat "$swa_str" "P Acc="
 local SWA_PACC="$net_stat_result"
-echo swa p accuracy: "$SWA_PACC""," no swa p accuracy: "$NO_SWA_PACC"
+echo swa policy accuracy: "$SWA_PACC""," no swa policy accuracy: "$NO_SWA_PACC"
 if (( $(echo ""$SWA_PACC" >= "$NO_SWA_PACC"" |bc -l) )); # no floating point operations in bash so bc utility is needed
 then
   BESTNET="swa-"
