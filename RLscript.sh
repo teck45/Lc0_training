@@ -4,14 +4,18 @@ TFFOLDER="/mnt/lczero-training-Nadam-rl/tf"
 YAMLPATH="/mnt/config/bt1024-rl-lowlr.yaml"    #"/mnt/config/40b-sicilian-low-lr.yaml"
 RESCORERPATH="/mnt/lc0-rescore_tb/build/release"  #path to folder where rescorer executable file is, no / at the end
 SYZYGYPATH="/mnt/syzygy"
+# so we include this lc0 folder here too :)
 STEPSDONEPATH="/mnt/trainstepslog.txt"
 STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
 STOPFILEPATH="/mnt/stopfile.txt"
 LASTNOSWANETSTAT="$TFFOLDER""/""no_swa_last_net_stat.txt"
 LASTSWANETSTAT="$TFFOLDER""/""swa_last_net_stat.txt"
 
-RAWDATAPATH="/mnt/atnb-raw/lc0" # ATTENTION! XDG HOMEPATH creates lc0 folder inside homepath folder, so we include this lc0 folder here too :)
+RAWDATAPATH="/mnt/atnb-raw/lc0" # ATTENTION! XDG HOMEPATH creates lc0 folder inside homepath folder
+SPECIALRAWDATAPATH="/mnt/special-atnb-raw/lc0"
 RAWTESTPATH="/mnt/atnb-raw-test"
+SPECIALRAWTESTPATH="/mnt/apecial-atnb-raw-test"
+
 NOTRESCOREDTRAINPATH="/mnt/no-r-train" #Folder where not rescored data is stored, separate from rawdata where clients send their data, and separate from folders used by traininig script
 NOTRESCOREDTESTPATH="/mnt/no-r-test"
 TRAINDATAPATH="/mnt/train-bt-r"
@@ -21,14 +25,22 @@ USEDTESTDATAPATH="/mnt/used-test-bt-r"
 
 TRAININGSTEP=500 # number of steps equals totalsteps in yaml (one iteration here)
 DATAGENLIMITMB=192 #192 mb for 500 steps # 768 #2400 - 100k chunks, 768 for 32k chunks
-
-RLSTARTPATH="./rlstart.sh"
+SPECIALLIMITMB=5
+#RLSTARTPATH="./rlstart.sh"
 NETSPATH="/mnt2/nets/BT1024-rl-lowlr/"
 BASENAMECORE="BT1024-rl-lowlr-" #swa-"
 #pick_best_net #launching function to check which net is better (swa vs no swa), result is global BASENAME variable
 #BASENAME="$BASENAMECORE""$BESTNET""$STEPSDONE" #BESTNET can be empty "" if no swa is better or "swa-" if swa net is better
 #commented because basename calculation moved into pick best net function
 #fullnetpath we want as result "/mnt/nets/40b-sicilian-low-lr/40b-sicilian-low-lr-swa-3500.pb.gz", 3500 will be read from trainstepslog.txt (stepsdone), .pb.gz will be added by script
+
+function get_folder_size () {
+        FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
+}
+
+function report_folder_size () {
+        echo folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
+}
 
 function datageneration () {
 	STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
@@ -37,7 +49,27 @@ function datageneration () {
 	echo BEST P ACC NET IS $BESTNET
 	FULLNETPATH="$NETSPATH""$BASENAME"".pb.gz"
 	echo complete net path for data generation "$FULLNETPATH"
-	cd ~ && "$RLSTARTPATH" "$FULLNETPATH"
+#	cd ~ && "$RLSTARTPATH" "$FULLNETPATH"
+        screen -ls
+        screen -S rl0 -X quit
+        screen -S rl1 -X quit
+        screen -S rl2 -X quit
+        screen -S rl3 -X quit
+        screen -ls
+
+#	screen -dmS rl0 bash -c "~/scripts/dag-ab-datagen0.sh '/mnt/syzygy' '$FULLNETPATH'"
+        screen -dmS rl1 bash -c "~/scripts/dag-ab-datagen1.sh '/mnt/syzygy' '$FULLNETPATH'"
+#        screen -dmS rl2 bash -c "~/scripts/atnb-datagen2.sh '/mnt/syzygy' '$FULLNETPATH'"
+#        screen -dmS rl3 bash -c "~/scripts/atnb-datagen3.sh '/mnt/syzygy' '$FULLNETPATH'"
+
+        echo "   __        /\_/\                         "
+        echo "  / /  _____= o_o =                        "
+        echo " ( (_./  )_    ^__                         "
+        echo "  \__(____)__<___>(@) RL CLIENTS 0,1,2,3 STARTED   "
+
+        echo screen -ls
+        screen -ls
+
 }
 
 function rlend ()  {
@@ -47,7 +79,32 @@ function rlend ()  {
 	screen -S rl1 -X quit
 	screen -S rl2 -X quit
 	screen -S rl3 -X quit
+	screen -S rl0f960 -X quit
 	echo closing clients
+}
+
+function special_rl_end () {
+        echo screen -ls
+        screen -ls
+	echo closing special client data generation
+        screen -S rl0f960 -X quit
+        
+}
+
+function special_rl_start () {
+        echo screen -ls
+	screen -dmS rl0f960 bash -c "~/scripts/dag-ab-f960-datagen0.sh '/mnt/syzygy' '$FULLNETPATH'"
+        echo special client rl0f960 is started on gpu0
+        screen -ls
+}
+
+function datagen_one_gpu_start () {
+	STEPSDONE=$(<"$STEPSDONEPATH") # reading stepsdone from logfile
+        pick_best_net #launching function to check which net is better (swa vs no swa), result is global BASENAME variable
+        FULLNETPATH="$NETSPATH""$BASENAME"".pb.gz"
+        screen -dmS rl0 bash -c "~/scripts/dag-ab-datagen0.sh '/mnt/syzygy' '$FULLNETPATH'"
+        echo standard data generation client is launched using gpu0
+        screen -ls
 }
 
 function split () {
@@ -138,11 +195,12 @@ function train () {
 	fi
 }
 
-function get_net_number()  #helper function for mv-first-folder(), will output 123 from name-swa-123a and name-123a
+function getnetnumber()  #helper function for mv-first-folder(), will output 123 from name-swa-123a and name-123a
 {
 local netname=$( basename "$1" )
 local i=0
 for (( i=${#netname}; i>0; i-- )); do
+#  echo "${netname:$i:1}"
   if [[ "${netname:$i:1}" == "-" ]]
   then
     iplus=$(( $i + 1 ))
@@ -158,6 +216,7 @@ function analyze_net_stat() {
 local line=$1
 local pattern=$2 
 local length=${#pattern}
+echo line pattern len $line $pattern $length
 for (( i=0; i<=${#line}; i++ )); do
   local check=${line:i:$length}
   if [[ $check == "$pattern" ]]; # "P Acc=" "V Acc="
@@ -177,7 +236,7 @@ analyze_net_stat "$no_swa_str" "P Acc="
 local NO_SWA_PACC=$net_stat_result
 analyze_net_stat "$swa_str" "P Acc="
 local SWA_PACC="$net_stat_result"
-echo swa policy accuracy: "$SWA_PACC""," no swa policy accuracy: "$NO_SWA_PACC"
+echo swa p accuracy: "$SWA_PACC""," no swa p accuracy: "$NO_SWA_PACC"
 if (( $(echo ""$SWA_PACC" >= "$NO_SWA_PACC"" |bc -l) )); # no floating point operations in bash so bc utility is needed
 then
   BESTNET="swa-"
@@ -200,7 +259,7 @@ cd "$FROMF"
 local MINNUMBER=100000000 # 100M steps is reasonably high number not supposed to exist
 
 for FOLDER in $FROMF/*; do
-    get_net_number "$FOLDER" # function will save output in global variable netnumber
+    getnetnumber "$FOLDER" # function will save output in global variable netnumber
     if [[ "$netnumber" -le "$MINNUMBER" ]]
     then
       MINNUMBER="$netnumber"
@@ -214,27 +273,41 @@ mv  *"-""$MINNUMBER"[a-z]* "$WHEREF" #pattern will use folders with names such a
 echo operation completed
 }
 
-function get_folder_size () {
-        FOLDERSIZE=$( du -sm "$RAWDATAPATH" | cut -f1 )
-}
-
-function report_folder_size () {
-        echo folder size is "$FOLDERSIZE" mb out of "$DATAGENLIMITMB" mb
-}
-
 while true
 do
         get_folder_size #calling function to calculate folder size
+	SPECIALFOLDERSIZE=$( du -sm "$SPECIALRAWDATAPATH" | cut -f1 )
+
 	if [[ "$FOLDERSIZE" -lt "$DATAGENLIMITMB"  ]] 
 	then
 		rlend #calling function to close clients that may be running
+		special_rl_end
                 report_folder_size #call function to print folder size
 		datageneration  #pathtonetwork
+		echo cp f size $SPECIALFOLDERSIZE 
+		echo sp limit $SPECIALLIMITMB
+		if [[ "$SPECIALFOLDERSIZE" -lt "$SPECIALLIMITMB" ]]
+		then
+		echo inside loop
+		special_rl_start
+		fi
+        
+	special_gen_finished=0
+
 	while [ "$FOLDERSIZE" -lt "$DATAGENLIMITMB" ] # run while we have less data than needed
 	do
-        	sleep 30m
         	get_folder_size
        		report_folder_size
+
+	        SPECIALFOLDERSIZE=$( du -sm "$SPECIALRAWDATAPATH" | cut -f1 )
+                echo special folder size is "$SPECIALFOLDERSIZE" mb out of "$SPECIALLIMITMB" mb
+		if [[ "$special_gen_finished" -eq 0 ]] &&  [[ "$SPECIALFOLDERSIZE" -ge "$SPECIALLIMITMB" ]]
+		then
+		    special_rl_end #closing f960 data generation
+		    datagen_one_gpu_start #starting ordinary data gen on gpu 0 instead of special (f960)
+		    special_gen_finished=1
+		fi
+		sleep 10m
 	done
 	fi
 	if [[ "$FOLDERSIZE" -ge "$DATAGENLIMITMB"  ]] # if we have more data than needed call end clients, splitrename and train.py
@@ -242,12 +315,19 @@ do
 		echo -n "limit is reached "; report_folder_size # -n will print without new line
 		pick_best_net # calling function to check which net is better (swa vs no swa), result is global BESTNET and BASENAME variables
 		rlend # calling function to close clients
+		special_rl_end #close F960 data generation
 		rename "$BASENAME" "$RAWDATAPATH" # folders with rawdata generated by clients will obtain meaningful names (basename+a,b,c..) 
+		rename ""F960-""$BASENAME"" "$SPECIALRAWDATAPATH" # renaming f960 folder
 		split "$RAWDATAPATH" "$RAWTESTPATH" # first parameter folder with folders to split, second parameter output (test) folder path
+		split "$SPECIALRAWDATAPATH" "$SPECIALRAWTESTPATH" #split f960 data
 		rescorerf "$RAWDATAPATH" "$TRAINDATAPATH" # syzygy path is variable at the top of script
 	       	rescorerf "$RAWTESTPATH" "$TESTDATAPATH"
+                rescorerf "$SPECIALRAWDATAPATH" "$TRAINDATAPATH"
+		rescorerf "$SPECIALRAWTESTPATH" "$TESTDATAPATH"
 		move "$RAWDATAPATH" "$NOTRESCOREDTRAINPATH"
 		move "$RAWTESTPATH" "$NOTRESCOREDTESTPATH"
+                move "$SPECIALRAWDATAPATH" "$NOTRESCOREDTRAINPATH"
+		move "$SPECIALRAWTESTPATH" "$NOTRESCOREDTESTPATH"
 		mv_first_folder "$TRAINDATAPATH" "$USEDTRAINDATAPATH"  # FROM WHERE
 		mv_first_folder "$TESTDATAPATH" "$USEDTESTDATAPATH"  # FROM WHERE
 		train "$YAMLPATH" #calling function to train the net, yaml should be with reasonable totalsteps - rl style
